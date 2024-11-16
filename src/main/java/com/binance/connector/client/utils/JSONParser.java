@@ -1,9 +1,11 @@
 package com.binance.connector.client.utils;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.LinkedList;
+import java.util.LinkedHashMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,10 +48,14 @@ public final class JSONParser {
             JSONObject json = new JSONObject();
             json.put("id", id);
             json.put("method", method);
-            json.put("params", parameters);
+
+            // Process parameters to format all doubles
+            JSONObject formattedParameters = formatDoublesInJSONObject(parameters);
+            json.put("params", formattedParameters);
+
             return json.toString();
         } catch (JSONException e) {
-            throw new JSONException(String.format("[JSONParser] Failed to convert to JSON string"));
+            throw new JSONException("[JSONParser] Failed to convert to JSON string");
         }
     }
 
@@ -76,6 +82,36 @@ public final class JSONParser {
         Object value = parameters.opt(key);
         parameters.remove(key);
         return value;
+    }
+
+    /**
+     * Iterates through a JSONObject and formats all double values to plain strings.
+     *
+     * @param jsonObject The original JSONObject.
+     * @return A new JSONObject with formatted double values.
+     */
+    private static JSONObject formatDoublesInJSONObject(JSONObject jsonObject) {
+        JSONObject formattedObject = new JSONObject();
+
+        Iterator<String> keys = jsonObject.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            Object value = jsonObject.get(key);
+
+            if (value instanceof Double) {
+                // Format the double value as a plain string
+                BigDecimal formattedValue = BigDecimal.valueOf((Double) value).stripTrailingZeros();
+                formattedObject.put(key, formattedValue.toPlainString()); // Store as a String
+            } else if (value instanceof JSONObject) {
+                // Recursively format nested JSONObjects
+                formattedObject.put(key, formatDoublesInJSONObject((JSONObject) value));
+            } else {
+                // Retain other types as-is
+                formattedObject.put(key, value);
+            }
+        }
+
+        return formattedObject;
     }
 
 }
