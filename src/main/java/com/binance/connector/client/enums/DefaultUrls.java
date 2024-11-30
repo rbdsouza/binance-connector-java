@@ -9,6 +9,8 @@ public final class DefaultUrls {
     public static final String TESTNET_WS_API_URL = "wss://ws-api.testnet.binance.vision/ws-api/v3";
     public static final String MARKET_URL = "https://data-api.binance.vision";
     public static final String MARKET_WS_URL = "wss://data-stream.binance.vision";
+    public static final String WEBSITE_URL = "https://www.binance.com"; // Added Binance website URL
+
     private DefaultUrls() {
     }
 }
